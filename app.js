@@ -290,14 +290,15 @@ async function getCozeReply(prompt) {
 
       const response = await axios(config);
 
-    
 
       if (response.status === 429) {
 
         return 'Too many question, can you wait and re-ask later?';
 
       }
-      logger("response: " + response);
+      logger("response.data: " + response.data);
+      logger("response.data.messages: " + response.data.messages);
+
 
       if (response.data && response.data.messages) {
         // Find the first message with the type "answer"
@@ -449,7 +450,7 @@ async function handleReply(userInput, sessionId, messageId, eventId) {
 
   logger("question: " + question);
 
-  logger("userInput: " + userInput);
+  logger("userInput.text: " + userInput.text);
 
   const action = question.trim();
 
