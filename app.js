@@ -1,3 +1,4 @@
+const express = require('express');
 const lark = require("@larksuiteoapi/node-sdk");
 
 var axios = require("axios");
@@ -11,7 +12,16 @@ const COZE_PAT = 'pat_fiGlPSAhjuypBdrskqa0mrk1xuG4AHVfH4HTQsU3ycrd05AKUO5DVRdctC
 const BOT_ID = '7375049088703741960'
 const MAX_TOKEN = 1024; //  Max token param 
 
+const app = express();
+const port = process.env.PORT || 3000;
 
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Sample endpoint to check server status
+app.get('/', (req, res) => {
+  res.send('Hello, this is your Node.js app running!');
+});
 
 const client = new lark.Client({
 
