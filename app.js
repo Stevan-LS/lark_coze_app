@@ -477,11 +477,7 @@ async function handleReply(userInput, sessionId, messageId, eventId) {
 
   }
 
-  const prompt = await buildConversation(sessionId, question);
-
   const cozeResponse = await getCozeReply(prompt);
-
-  await saveConversation(sessionId, question, cozeResponse)
 
   await reply(messageId, cozeResponse);
 
@@ -560,22 +556,6 @@ module.exports = async function (params, context) {
     let senderId = params.event.sender.sender_id.user_id;
 
     let sessionId = chatId + senderId;
-
-
-
-    // process event only once.
-
-    const count = await EventDB.where({ event_id: eventId }).count();
-
-    if (count != 0) {
-
-      logger("skip repeat event");
-
-      return { code: 1 };
-
-    }
-
-    await EventDB.save({ event_id: eventId });
 
 
 
