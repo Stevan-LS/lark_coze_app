@@ -296,9 +296,6 @@ async function getCozeReply(prompt) {
         return 'Too many question, can you wait and re-ask later?';
 
       }
-      logger("response.data: " + response.data);
-      logger("response.data.messages: " + response.data.messages);
-
 
       if (response.data && response.data.messages) {
         // Find the first message with the type "answer"
@@ -450,8 +447,6 @@ async function handleReply(userInput, sessionId, messageId, eventId) {
 
   logger("question: " + question);
 
-  logger("userInput.text: " + userInput.text);
-
   const action = question.trim();
 
   if (action.startsWith("/")) {
@@ -462,7 +457,7 @@ async function handleReply(userInput, sessionId, messageId, eventId) {
 
   const prompt = await buildConversation(sessionId, question);
 
-  const cozeResponse = await getCozeReply(prompt);
+  const cozeResponse = await getCozeReply(question);
 
   await reply(messageId, cozeResponse);
 
