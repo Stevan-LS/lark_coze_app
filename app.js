@@ -297,6 +297,7 @@ async function getCozeReply(prompt) {
         return 'Too many question, can you wait and re-ask later?';
 
       }
+      logger("response: " + response);
 
       if (response.data && response.data.messages) {
         // Find the first message with the type "answer"
@@ -447,6 +448,8 @@ async function handleReply(userInput, sessionId, messageId, eventId) {
   const question = userInput.text.replace("@_user_1", "");
 
   logger("question: " + question);
+
+  logger("userInput: " + userInput);
 
   const action = question.trim();
 
