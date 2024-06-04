@@ -3,10 +3,10 @@ const lark = require("@larksuiteoapi/node-sdk");
 const axios = require("axios");
 
 const LARK_APP_ID = 'cli_a6df832907f8d010'; // Larksuite appid 
-const LARK_APP_SECRET = 'v'; // larksuite app secret
+const LARK_APP_SECRET = 'q8wXFw1TaIvUDCQnIvprOf1aLlEZvBlj'; // larksuite app secret
 const COZE_PAT = 'pat_fiGlPSAhjuypBdrskqa0mrk1xuG4AHVfH4HTQsU3ycrd05AKUO5DVRdctCzXOV65';
 const BOT_ID = '7375049088703741960';
-const MAX_TOKEN = '1024';
+const MAX_TOKEN = 1024;
 
 const app = express()
 const port = process.env.PORT || 4000;
