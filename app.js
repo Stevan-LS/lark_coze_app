@@ -102,25 +102,6 @@ async function reply(messageId, content) {
 async function buildConversation(sessionId, question) {
 
   let prompt = [];
-
-  
-
-  // read history record from msg table
-
-  const historyMsgs = await MsgTable.where({ sessionId }).find();
-
-  for (const conversation of historyMsgs) {
-
-      // {"role": "system", "content": "You are a helpful assistant."},
-
-      prompt.push({"role": "user", "content": conversation.question})
-
-      prompt.push({"role": "assistant", "content": conversation.answer})
-
-  }
-
-
-
   // build the latest question
 
   prompt.push({"role": "user", "content": question})
@@ -461,8 +442,6 @@ async function doctor() {
 
 }
 
-
-
 async function handleReply(userInput, sessionId, messageId, eventId) {
 
   const question = userInput.text.replace("@_user_1", "");
@@ -477,6 +456,8 @@ async function handleReply(userInput, sessionId, messageId, eventId) {
 
   }
 
+  const prompt = await buildConversation(sessionId, question);
+
   const cozeResponse = await getCozeReply(prompt);
 
   await reply(messageId, cozeResponse);
@@ -484,12 +465,6 @@ async function handleReply(userInput, sessionId, messageId, eventId) {
 
 
   // update content to the event record
-
-  const evt_record = await EventDB.where({ event_id: eventId }).findOne();
-
-  evt_record.content = userInput.text;
-
-  await EventDB.save(evt_record);
 
   return { code: 0 };
 
