@@ -1,14 +1,6 @@
-const aircode = require("aircode");
-
 const lark = require("@larksuiteoapi/node-sdk");
 
 var axios = require("axios");
-
-const EventDB = aircode.db.table("event");
-
-const MsgTable = aircode.db.table("msg"); // table use to save record of conversation
-
-
 
 const LARK_APP_ID = 'cli_a6df832907f8d010'; // Larksuite appid 
 
