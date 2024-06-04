@@ -2,11 +2,11 @@ const express = require('express')
 const lark = require("@larksuiteoapi/node-sdk");
 const axios = require("axios");
 
-const LARK_APP_ID = process.env.LARK_APP_ID; // Larksuite appid 
-const LARK_APP_SECRET = process.env.LARK_APP_SECRET; // larksuite app secret
-const COZE_PAT = process.env.COZE_PAT;
-const BOT_ID = process.env.BOT_ID;
-const MAX_TOKEN = process.env.MAX_TOKEN;
+const LARK_APP_ID = 'cli_a6df832907f8d010'; // Larksuite appid 
+const LARK_APP_SECRET = 'v'; // larksuite app secret
+const COZE_PAT = 'pat_fiGlPSAhjuypBdrskqa0mrk1xuG4AHVfH4HTQsU3ycrd05AKUO5DVRdctCzXOV65';
+const BOT_ID = '7375049088703741960';
+const MAX_TOKEN = '1024';
 
 const app = express()
 const port = process.env.PORT || 4000;
