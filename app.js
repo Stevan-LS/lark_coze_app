@@ -1,4 +1,4 @@
-const express = require('express')
+const express = require('express');
 const lark = require("@larksuiteoapi/node-sdk");
 const axios = require("axios");
 
