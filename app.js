@@ -12,6 +12,7 @@ const MAX_TOKEN = 100000;
 const app = express()
 const port = process.env.PORT || 4000;
 
+/*
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'rpiproje',
@@ -24,6 +25,7 @@ connection.connect((err) => {
   if (err) throw err;
   console.log('Connected to the MySQL database');
 });
+*/
 
 // Middleware to parse JSON bodies
 app.use(express.json());
