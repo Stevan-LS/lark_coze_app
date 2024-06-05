@@ -17,7 +17,7 @@ app.use(express.json());
 app.post('/', async (req, res) => {
   try {
     const params = req.body;
-    console.log('Request body:', params);
+    console.log('Request body:', JSON.stringify(params, null, 2));
     const context = {}; // Context can include additional info if needed
     const result = await module.exports(params, context);
     res.json(result);
