@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const lark = require("@larksuiteoapi/node-sdk");
 const axios = require("axios");
 
@@ -17,6 +17,7 @@ app.use(express.json());
 app.post('/', async (req, res) => {
   try {
     const params = req.body;
+    console.log('Request body:', params);
     const context = {}; // Context can include additional info if needed
     const result = await module.exports(params, context);
     res.json(result);
