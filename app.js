@@ -30,6 +30,9 @@ connection.connect((err) => {
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.send('<h1>Welcome to My Node.js Web Service!</h1>');
+});
 
 app.post('/', async (req, res) => {
   try {
