@@ -1,42 +1,23 @@
 const express = require("express");
 const lark = require("@larksuiteoapi/node-sdk");
 const axios = require("axios");
-const mysql = require('mysql');
 
 const LARK_APP_ID = 'cli_a6df832907f8d010'; // Larksuite appid 
 const LARK_APP_SECRET = 'q8wXFw1TaIvUDCQnIvprOf1aLlEZvBlj'; // larksuite app secret
 const COZE_PAT = 'pat_fiGlPSAhjuypBdrskqa0mrk1xuG4AHVfH4HTQsU3ycrd05AKUO5DVRdctCzXOV65';
 const BOT_ID = '7375049088703741960';
-const MAX_TOKEN = 100000;
+const MAX_TOKEN = 1024;
 
 const app = express()
 const port = process.env.PORT || 4000;
 
-/*
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'rpiproje',
-  password: 'ASDghj53412412!',
-  database: 'rpiproje_laravel_demo'
-});
-
-// Connect to the MySQL database
-connection.connect((err) => {
-  if (err) throw err;
-  console.log('Connected to the MySQL database');
-});
-*/
-
 // Middleware to parse JSON bodies
 app.use(express.json());
-
-app.get('/', (req, res) => {
-  res.send('<h1>Welcome to My Node.js Web Service!</h1>');
-});
 
 app.post('/', async (req, res) => {
   try {
     const params = req.body;
+    console.log('Request body:', JSON.stringify(params, null, 2));
     const context = {}; // Context can include additional info if needed
     const result = await module.exports(params, context);
     res.json(result);
@@ -108,110 +89,99 @@ async function reply(messageId, content) {
 
 // Use Session ID to build coversation
 
-function buildConversation(sessionId, question) {
+async function buildConversation(sessionId, question) {
+
   let prompt = [];
+  // build the latest question
 
-  // Read history record from the message table
-  const query = 'SELECT question, answer FROM message WHERE session_id = ?';
-  return new Promise((resolve, reject) => {
-    connection.query(query, [sessionId], (error, results) => {
-      if (error) {
-        reject(error);
-      } else {
-        for (const conversation of results) {
-          prompt.push({ "role": "user", "content": conversation.question, "content_type":"text"});
-          prompt.push({ "role": "assistant", "type":"answer", "content": conversation.answer, "content_type":"text"});
-        }
+  prompt.push({"role": "user", "content": question})
 
-        // Build the latest question
-        prompt.push({ "role": "user", "content": question, "content_type":"text"});
-        resolve(prompt);
-      }
-    });
-  });
+  return prompt;
+
 }
 
 
 
 //  save conversation
-function saveConversation(sessionId, question, answer) {
-  const msgSize = question.length + answer.length;
 
-  // Insert a new record into the message table
-  const query = 'INSERT INTO message (session_id, question, answer, message_size) VALUES (?, ?, ?, ?)';
-  return new Promise((resolve, reject) => {
-    connection.query(query, [sessionId, question, answer, msgSize], (error, results) => {
-      if (error) {
-        reject(error);
-      } else {
-        // Check and discard old conversation
-        discardConversation(sessionId)
-          .then(() => resolve(results))
-          .catch(reject);
-      }
-    });
+async function saveConversation(sessionId, question, answer) {
+
+  const msgSize =  question.length + answer.length
+
+  const result = await MsgTable.save({
+
+    sessionId,
+
+    question,
+
+    answer,
+
+    msgSize,
+
   });
+
+  if (result) {
+
+    // check and discard old conversation
+
+    await discardConversation(sessionId);
+
+  }
+
 }
+
+
 
 // if histroy size over max_token, drop the first question in conversation
 
-function discardConversation(sessionId) {
+async function discardConversation(sessionId) {
+
   let totalSize = 0;
+
   const countList = [];
 
-  // Read history record from the message table
-  const query = 'SELECT id, message_size FROM message WHERE session_id = ? ORDER BY created_at DESC';
-  return new Promise((resolve, reject) => {
-    connection.query(query, [sessionId], async (error, results) => {
-      if (error) {
-        reject(error);
-      } else {
-        for (const msg of results) {
-          totalSize += msg.msgSize;
-          countList.push({
-            msgId: msg.id,
-            totalSize,
-          });
-        }
+  const historyMsgs = await MsgTable.where({ sessionId }).sort({ createdAt: -1 }).find();
 
-        for (const c of countList) {
-          if (c.totalSize > MAX_TOKEN) {
-            // Delete the message with the given msgId
-            const deleteQuery = 'DELETE FROM message WHERE id = ?';
-            await new Promise((deleteResolve, deleteReject) => {
-              connection.query(deleteQuery, [c.msgId], (deleteError) => {
-                if (deleteError) {
-                  deleteReject(deleteError);
-                } else {
-                  deleteResolve();
-                }
-              });
-            });
-          }
-        }
+  const historyMsgLen = historyMsgs.length;
 
-        resolve();
-      }
+  for (let i = 0; i < historyMsgLen; i++) {
+
+    const msgId = historyMsgs[i]._id;
+
+    totalSize += historyMsgs[i].msgSize;
+
+    countList.push({
+
+      msgId,
+
+      totalSize,
+
     });
-  });
+
+  }
+
+  for (const c of countList) {
+
+    if (c.totalSize > MAX_TOKEN) {
+
+      await MsgTable.where({_id: c.msgId}).delete();
+
+    }
+
+  }
+
 }
+
 
 
 // clean old conversation
 
-function clearConversation(sessionId) {
-  // Delete all messages with the given sessionId
-  const query = 'DELETE FROM message WHERE session_id = ?';
-  return new Promise((resolve, reject) => {
-    connection.query(query, [sessionId], (error, results) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(results.affectedRows);
-      }
-    });
-  });
+async function clearConversation(sessionId) {
+
+  return await MsgTable.where({ sessionId }).delete();
+
 }
+
 
 
 // command process
@@ -282,14 +252,14 @@ async function cmdClear(sessionId, messageId) {
 
 // get coze reply
 
-async function getCozeReply(question, chatHistory, sessionId, senderId) {
+async function getCozeReply(prompt) {
+
 
   var data = JSON.stringify({
-    "conversation_id": sessionId,
+    "conversation_id": "123",
     "bot_id": BOT_ID,
-    "user": senderId,
-    "query": question,
-    "chat_history": chatHistory,
+    "user": "123333333",
+    "query": prompt,
     "stream": false
   });
   
@@ -461,52 +431,33 @@ async function doctor() {
 
 }
 
-async function handleReply(userInput, sessionId, messageId, eventId, senderId) {
+async function handleReply(userInput, sessionId, messageId, eventId) {
 
   const question = userInput.text.replace("@_user_1", "");
+
   logger("question: " + question);
 
   const action = question.trim();
+
   if (action.startsWith("/")) {
-    return await cmdProcess({ action, sessionId, messageId });
+
+    return await cmdProcess({action, sessionId, messageId});
+
   }
 
-  const chatHistory = await buildConversation(sessionId, question);
-  logger(chatHistory);
+  const prompt = await buildConversation(sessionId, question);
 
-  const cozeResponse = await getCozeReply(question, chatHistory, sessionId, senderId);
-
-  await saveConversation(sessionId, question, cozeResponse);
+  const cozeResponse = await getCozeReply(question);
 
   await reply(messageId, cozeResponse);
 
-  // Update content to the event record
-  const selectQuery = 'SELECT * FROM events WHERE event_id = ?';
-  return new Promise((resolve, reject) => {
-    connection.query(selectQuery, [eventId], (selectError, results) => {
-      if (selectError) {
-        reject(selectError);
-      } else {
-        if (results.length === 0) {
-          reject(new Error('Event not found'));
-        } else {
-          const evt_record = results[0];
-          evt_record.content = userInput.text;
 
-          const updateQuery = 'UPDATE events SET content = ? WHERE event_id = ?';
-          connection.query(updateQuery, [evt_record.content, eventId], (updateError) => {
-            if (updateError) {
-              reject(updateError);
-            } else {
-              resolve({ code: 0 });
-            }
-          });
-        }
-      }
-    });
-  });
+
+  // update content to the event record
+
+  return { code: 0 };
+
 }
-
 
 
 
@@ -571,27 +522,6 @@ module.exports = async function (params, context) {
     let sessionId = chatId + senderId;
 
 
-    // Check if the event already exists in the database
-    const query = 'SELECT COUNT(*) as count FROM events WHERE event_id = ?';
-    connection.query(query, [eventId], (error, results) => {
-      if (error) {
-        throw error;
-      } else {
-        const count = results[0].count;
-        if (count !== 0) {
-          logger('Skip repeat event');
-          return { code: 1 };
-        } else {
-          // Insert a new record into the database
-          const insertQuery = 'INSERT INTO events (event_id) VALUES (?)';
-          connection.query(insertQuery, [eventId], (insertError) => {
-            if (insertError) {
-              throw insertError;
-            }
-          });
-        }
-      }
-    });
 
     // replay in private chat
 
@@ -613,7 +543,7 @@ module.exports = async function (params, context) {
 
       const userInput = JSON.parse(params.event.message.content);
 
-      return await handleReply(userInput, sessionId, messageId, eventId, senderId);
+      return await handleReply(userInput, sessionId, messageId, eventId);
 
     }
 
@@ -625,7 +555,7 @@ module.exports = async function (params, context) {
 
       const userInput = JSON.parse(params.event.message.content);
 
-      return await handleReply(userInput, sessionId, messageId, eventId, senderId);
+      return await handleReply(userInput, sessionId, messageId, eventId);
 
     }
 
