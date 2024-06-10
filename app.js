@@ -5,11 +5,11 @@ const axios = require("axios");
 const { Pool } = require('pg');
 require('dotenv').config();
 
-const LARK_APP_ID = 'cli_a6df832907f8d010'; // Larksuite appid 
-const LARK_APP_SECRET = 'q8wXFw1TaIvUDCQnIvprOf1aLlEZvBlj'; // larksuite app secret
-const COZE_PAT = 'pat_fiGlPSAhjuypBdrskqa0mrk1xuG4AHVfH4HTQsU3ycrd05AKUO5DVRdctCzXOV65';
-const BOT_ID = '7375049088703741960';
-const MAX_TOKEN = 100000;
+const LARK_APP_ID = process.env.LARK_APP_ID; // Larksuite appid 
+const LARK_APP_SECRET = process.env.LARK_APP_SECRET; // larksuite app secret
+const COZE_PAT = process.env.COZE_PAT;
+const BOT_ID = process.env.BOT_ID;
+const MAX_TOKEN = process.env.MAX_TOKEN;
 
 const app = express();
 const port = process.env.PORT || 4000;
