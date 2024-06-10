@@ -5,8 +5,8 @@ const axios = require("axios");
 const { Pool } = require('pg');
 require('dotenv').config();
 
-const LARK_APP_ID = process.env.LARK_APP_ID; // Larksuite appid 
-const LARK_APP_SECRET = process.env.LARK_APP_SECRET; // larksuite app secret
+const LARK_APP_ID = process.env.LARK_APP_ID_PERSO; // Larksuite appid 
+const LARK_APP_SECRET = process.env.LARK_APP_SECRET_PERSO; // larksuite app secret
 const COZE_PAT = process.env.COZE_PAT;
 const BOT_ID = process.env.BOT_ID;
 const MAX_TOKEN = process.env.MAX_TOKEN;
@@ -227,7 +227,7 @@ async function getCozeReply(question, chatHistory, sessionId, senderId) {
 
   try {
     const response = await axios(config);
-
+    logger(response);
 
     if (response.status === 429) {
       return 'Too many question, can you wait and re-ask later?';
