@@ -227,6 +227,7 @@ async function getCozeReply(question, chatHistory, sessionId, senderId) {
 
   try {
     const response = await axios(config);
+    logger(JSON.stringify(response));
 
     if (response.status === 429) {
       return 'Too many question, can you wait and re-ask later?';
@@ -312,7 +313,6 @@ async function handleReply(userInput, sessionId, messageId, eventId, senderId) {
   }
 
   const chatHistory = await buildConversation(sessionId, question);
-  logger(chatHistory);
 
   const cozeResponse = await getCozeReply(question, chatHistory, sessionId, senderId);
 
