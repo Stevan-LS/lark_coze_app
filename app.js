@@ -7,8 +7,8 @@ require('dotenv').config();
 
 const LARK_APP_ID = process.env.LARK_APP_ID_PERSO; // Larksuite appid 
 const LARK_APP_SECRET = process.env.LARK_APP_SECRET_PERSO; // larksuite app secret
-const COZE_PAT = process.env.COZE_PAT;
-const BOT_ID = process.env.BOT_ID;
+const COZE_PAT = process.env.COZE_PAT_PERSO;
+const BOT_ID = process.env.BOT_ID_PERSO;
 const MAX_TOKEN = process.env.MAX_TOKEN;
 
 const app = express();
