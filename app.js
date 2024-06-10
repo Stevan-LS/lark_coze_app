@@ -95,12 +95,9 @@ function buildConversation(sessionId, question) {
 
 // Save conversation
 function saveConversation(sessionId, question, answer) {
-  logger("enter save conversation");
   const msgSize = question.length + answer.length;
   const insertQuery = 'INSERT INTO messages (session_id, question, answer, message_size) VALUES ($1, $2, $3, $4)';
   const values = [sessionId, question, answer, msgSize];
-  logger("values");
-  logger(values);
 
   return new Promise((resolve, reject) => {
     pool.query(insertQuery, values, (error, results) => {
