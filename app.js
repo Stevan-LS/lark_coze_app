@@ -54,7 +54,6 @@ function logger(param) {
 }
 
 async function reply(messageId, content) {
-  const content_temp = "Test: Normal content <b>bold content<i>, bold and italic content</i></b>"
   try {
     return await larkClient.im.message.reply({
       path: {
@@ -62,7 +61,7 @@ async function reply(messageId, content) {
       },
       data: {
         content: JSON.stringify({
-          text: content_temp,
+          text: content,
         }),
         msg_type: "text",
       },
@@ -203,6 +202,10 @@ async function cmdClear(sessionId, messageId) {
   await reply(messageId, "✅ All history removed");
 }
 
+function replaceBoldMarkers(text) {
+  return text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+}
+
 // Get Coze reply
 async function getCozeReply(question, chatHistory, sessionId, senderId) {
   const data = JSON.stringify({
@@ -238,7 +241,7 @@ async function getCozeReply(question, chatHistory, sessionId, senderId) {
     if (response.data && response.data.messages) {
       const answerMessage = response.data.messages.find(message => message.type === "answer");
       if (answerMessage) {
-        return answerMessage.content;
+        return replaceBoldMarkers(answerMessage.content);
       } else {
         return 'No answer found in the response';
       }
